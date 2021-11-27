@@ -18,5 +18,5 @@ public class QuestionDTO {
 
     private int correctAnswerIndex;
 
-    private Category category;
+    private String categoryId;
 }

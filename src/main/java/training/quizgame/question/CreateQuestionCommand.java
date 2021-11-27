@@ -16,5 +16,5 @@ public class CreateQuestionCommand {
 
     private int correctAnswerIndex;
 
-    private Category category;
+    private String categoryId;
 }

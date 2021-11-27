@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import training.quizgame.category.Category;
 
 @Data
 @AllArgsConstructor
@@ -22,12 +21,12 @@ public class Question {
 
     private int correctAnswerIndex;
 
-    private Category category;
+    private String categoryId;
 
-    public Question(String question, String[] answers, int correctAnswerIndex, Category category) {
+    public Question(String question, String[] answers, int correctAnswerIndex, String categoryId) {
         this.question = question;
         this.answers = answers;
         this.correctAnswerIndex = correctAnswerIndex;
-        this.category = category;
+        this.categoryId = categoryId;
     }
 }

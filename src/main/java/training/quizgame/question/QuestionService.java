@@ -28,7 +28,7 @@ public class QuestionService {
                 command.getQuestion(),
                 command.getAnswers(),
                 command.getCorrectAnswerIndex(),
-                command.getCategory()
+                command.getCategoryId()
         );
         questionRepository.save(question);
 

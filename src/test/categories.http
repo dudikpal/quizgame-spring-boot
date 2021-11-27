@@ -1,8 +1,11 @@
+
+###
+
 POST http://localhost:8080/api/categories
 Content-Type: application/json
 
 {
-  "name": "Postbol3"
+  "name": "Postbol2"
 }
 
 ###
@@ -21,7 +24,7 @@ Content-Type: application/json
         "masodik valasz"
 ],
   "correctAnswerIndex": 1,
-  "category": "Postbol3"
+  "categoryId": "619ec2f67f3222af371920ab"
 }
 
 
