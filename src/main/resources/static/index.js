@@ -1,17 +1,29 @@
 let url = '/api/categories';
-let injectedField = document.querySelector("#here");
+let listBox = document.querySelector("#categoriesList");
 
-console.log(injectedField);
 
-function readAllCategories() {
+(function readAllCategories() {
     fetch(url)
         .then(function (response) {
             return response.json();
         })
         .then(function(jsonData) {
-            injectedField.innerHTML = jsonData[0].name;
-            console.log(jsonData)
-        });
-}
+            let categories = jsonData.valueOf();
+            for (const category of categories) {
+                let label = document.createElement('label');
+                let checkbox = document.createElement('input');
 
-readAllCategories();
+                label.setAttribute('for', category.id);
+                label.style.display = "block";
+                checkbox.type = 'checkbox';
+                checkbox.setAttribute('id', category.id);
+
+
+                label.appendChild(checkbox);
+                label.innerHTML += ' ' + category.name;
+                listBox.appendChild(label);
+            }
+        });
+})();
+
+//readAllCategories();
