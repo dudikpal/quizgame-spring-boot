@@ -23,24 +23,9 @@
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="padding: 10px">
-
-            <div class="card" id="addNewCategory"
-                 style="width: fit-content; background-color: white; display: block; border: 1px solid; padding: 10px">
-                <div class="card-header">
-                    Add new category
-                </div>
-                <div class="card-body">
-                <label for="newCategoryName">
-                    <input id="newCategoryName" type="text">
-                    <button id="submit-new-category-button" style="padding: 5px 12px; margin: 5px" class="btn-success">Submit</button>
-                </label>
-                </div>
-            </div>
-        </div>
 
         <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="display: block;">
-            <div class="card" id="adminNewQuestionForm"
+            <div class="card" id="questionForm"
                  style="margin: 10px; padding: 15px; max-width: 45rem; min-width: 35rem; background-color: white; display: block; border: 1px solid">
                 <label for="question">
                     Question:
@@ -72,6 +57,51 @@
                     </button>
                     <label id="status-label" style="margin: 0 20px"></label>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="padding: 10px">
+            <div class="card" id="addNewCategory"
+                 style="width: fit-content; background-color: white; display: block; border: 1px solid; padding: 10px">
+                <div class="card-header">
+                    Add new category
+                </div>
+                <div class="card-body">
+                    <label for="newCategoryName">
+                        <input id="newCategoryName" type="text">
+                        <button id="submit-new-category-button" style="padding: 5px 12px; margin: 5px"
+                                class="btn-success">Submit
+                        </button>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="display: block;">
+            <div class="card" id="questionForEdit"
+                 style="margin: 10px; padding: 15px; max-width: 45rem; min-width: 35rem; background-color: white; display: block; border: 1px solid">
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="selectFromCategory">Categories</label>
+                    <select class="form-select" id="selectFromCategory">
+
+                    </select>
+                </div>
+                <div id="selectQuestion" class="list-group " style="overflow: scroll; max-height: 30rem; "  aria-label="size 3 select example">
+
+                    <a class="list-group-item list-group-item-action">With a normal list with a limited width you shouldn't have this problem as it would break line automatically. See this fiddle: jsfiddle.net/u68vovqg .You may have some other style that is forcing that behavior. –
+                        Mauricio Moraes
+                        Mar 18 '15 at 17:54</a>
+                    <a class="list-group-item list-group-item-action">With a normal list with a limited width you shouldn't have this problem as it would break line automatically. See this fiddle: jsfiddle.net/u68vovqg .You may have some other style that is forcing that behavior. –
+                        Mauricio Moraes
+                        Mar 18 '15 at 17:54</a>
+
+
+                </div>
+
+
+
             </div>
         </div>
     </div>

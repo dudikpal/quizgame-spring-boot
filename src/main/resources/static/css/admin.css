@@ -1,0 +1,16 @@
+#ddddd {
+    display: table;
+    border-collapse: collapse;
+    width: 100px;
+}
+
+#ddddd a {
+    height: 3em;
+    border: 1px solid #ff0000;
+    display: table-row;
+}
+
+#ddddd a span{
+    display:table-cell;
+    vertical-align: middle;
+}

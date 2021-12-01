@@ -13,8 +13,21 @@ function readAllCategories() {
             let categories = jsonData.valueOf();
             for (const category of categories) {
                 appendCategory(category);
+                appendToSelectCategory(category);
             }
         });
+};
+
+function appendToSelectCategory(category) {
+    let selectedCategory = document.querySelector('#selectFromCategory');
+    let option = document.createElement('option');
+
+    option.id = category.id;
+    option.name = 'selectCategory';
+    option.setAttribute('onclick', 'updateQuestion()');
+    option.innerHTML = category.name;
+
+    selectedCategory.appendChild(option);
 };
 
 function appendCategory(category) {
@@ -33,7 +46,7 @@ function appendCategory(category) {
     label.appendChild(radio);
     label.appendChild(name);
     listBox.appendChild(label);
-}
+};
 
 readAllCategories();
 
@@ -99,13 +112,27 @@ function submitCategory() {
             "Content-Type": "application/json"
         }
     })
-        .then(function(response) {
+        .then(function (response) {
             return response.json();
         })
-        .then(function(jsonData) {
+        .then(function (jsonData) {
             appendCategory(jsonData.valueOf());
             newCategoryName.value = '';
         });
 }
 
 submitCategoryButton.setAttribute('onclick', 'submitCategory()');
+
+
+function updateQuestion() {
+    let selectedCategory = document.querySelector('#selectFromCategory');
+    const categoryId = document.querySelector('#selectQuestion');
+    const id = this;
+    console.log(categoryId.id);
+    console.log(id);
+
+    let selectQuestionDiv = document.querySelector('#selectQuestion');
+
+
+}
+
