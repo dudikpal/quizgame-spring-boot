@@ -1,5 +1,7 @@
 let url = '/api/categories';
 let listBox = document.querySelector("#adminCategoriesList");
+let upgradeQuestion = false;
+let upgradeQuestionId;
 
 function readAllCategories() {
 
@@ -12,25 +14,28 @@ function readAllCategories() {
         .then(function (jsonData) {
             let categories = jsonData.valueOf();
             for (const category of categories) {
-                appendCategory(category);
-                appendToSelectCategory(category);
+                fillCategoryToCreateQuestion(category);
+                // init dropdown with empty option
+                fillCategoryToUpgradeQuestion({id: 0, name: ""});
+                fillCategoryToUpgradeQuestion(category);
             }
         });
 };
 
-function appendToSelectCategory(category) {
-    let selectedCategory = document.querySelector('#selectFromCategory');
+function fillCategoryToUpgradeQuestion(category) {
+    let selectedCategory = document.querySelector('#categoryToUpgradeQuestion');
     let option = document.createElement('option');
 
     option.id = category.id;
     option.name = 'selectCategory';
-    option.setAttribute('onclick', 'updateQuestion()');
     option.innerHTML = category.name;
 
     selectedCategory.appendChild(option);
+
+
 };
 
-function appendCategory(category) {
+function fillCategoryToCreateQuestion(category) {
     let label = document.createElement('label');
     let radio = document.createElement('input');
     let name = document.createElement('span');
@@ -50,9 +55,9 @@ function appendCategory(category) {
 
 readAllCategories();
 
-const submitQuestionButton = document.querySelector('#submit-question-button');
+const createQuestionButton = document.querySelector('#submit-question-button');
 
-function submitQuestion() {
+function createQuestion() {
     const question = document.querySelector('#question');
     const answer0 = document.querySelector('#answer-0');
     const answer1 = document.querySelector('#answer-1');
@@ -72,31 +77,45 @@ function submitQuestion() {
 
     const url = 'api/questions';
 
-    fetch(url, {
-        method: "POST",
-        body: data,
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-        .then(function () {
-            let statusLabel = document.querySelector('#status-label');
-            statusLabel.innerHTML = 'Save successful';
-            question.value = '';
-            answer0.value = '';
-            answer1.value = '';
-            answer2.value = '';
-            answer3.value = '';
-            correctAnswerIndex.checked = false;
-            categoryId.checked = false;
+    if (upgradeQuestion) {
+
+        fetch(url + '/' + upgradeQuestionId, {
+            method: "PUT",
+            body: data,
+            headers: {
+                "Content-Type": "application/json"
+            }
         });
+
+        upgradeQuestion = false;
+    } else {
+
+        fetch(url, {
+            method: "POST",
+            body: data,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+    }
+
+    let statusLabel = document.querySelector('#status-label');
+    statusLabel.innerHTML = 'Save successful';
+    question.value = '';
+    answer0.value = '';
+    answer1.value = '';
+    answer2.value = '';
+    answer3.value = '';
+    correctAnswerIndex.checked = false;
+    categoryId.checked = false;
+
 }
 
-submitQuestionButton.setAttribute('onclick', 'submitQuestion()');
+createQuestionButton.setAttribute('onclick', 'createQuestion()');
 
-const submitCategoryButton = document.querySelector('#submit-new-category-button');
+const createCategoryButton = document.querySelector('#submit-new-category-button');
 
-function submitCategory() {
+function createCategory() {
     const newCategoryName = document.querySelector('#newCategoryName');
 
     let data = JSON.stringify({
@@ -116,23 +135,80 @@ function submitCategory() {
             return response.json();
         })
         .then(function (jsonData) {
-            appendCategory(jsonData.valueOf());
+            fillCategoryToCreateQuestion(jsonData.valueOf());
+            fillCategoryToUpgradeQuestion(jsonData.valueOf());
             newCategoryName.value = '';
         });
 }
 
-submitCategoryButton.setAttribute('onclick', 'submitCategory()');
+createCategoryButton.setAttribute('onclick', 'createCategory()');
 
 
 function updateQuestion() {
-    let selectedCategory = document.querySelector('#selectFromCategory');
-    const categoryId = document.querySelector('#selectQuestion');
-    const id = this;
-    console.log(categoryId.id);
-    console.log(id);
+    const selectBox = document.querySelector('#categoryToUpgradeQuestion');
+    const selectedCategoryId = selectBox.options[selectBox.selectedIndex].id;
 
-    let selectQuestionDiv = document.querySelector('#selectQuestion');
+    let data = JSON.stringify({
+        "id": selectedCategoryId
+    });
+    const url = '/api/categories/' + selectedCategoryId;
+
+    fetch(url)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (jsonData) {
+            let listDiv = document.querySelector('#selectQuestion');
+            listDiv.innerHTML = '';
+            for (const element of jsonData.valueOf()) {
+                fillUpgradeQuestionList(element);
+            }
+        });
 
 
+}
+
+
+function loadUpgradableQuestion() {
+    const url = '/api/questions/' + this.id;
+    upgradeQuestion = true;
+
+    fetch(url)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (jsonData) {
+            const data = jsonData.valueOf();
+            upgradeQuestionId = data.id;
+            let categoryId = data.categoryId;
+            let questionText = data.question;
+            for (let i = 0; i < 4; i++) {
+                let answer = document.querySelector(`#answer-${i}`);
+                answer.value = data.answers[i];
+            }
+            const correctAnswerIndex = data.correctAnswerIndex;
+
+            document.querySelector('#question').value = questionText;
+            let item = document.querySelector('#adminCategoriesList');
+            let item2 = item.querySelector('label');
+            item2.
+            console.log(item)
+            console.log(item2)
+            console.log(item3)
+            console.log(upgradeQuestionId)
+        })
+}
+
+
+function fillUpgradeQuestionList(questionObject) {
+    let listDiv = document.querySelector('#selectQuestion');
+    let questionToList = questionObject.question;
+    console.log(questionToList);
+    let aTag = document.createElement('a');
+    aTag.classList.add('list-group-item', 'list-group-item-action');
+    aTag.setAttribute('onclick', 'loadUpgradableQuestion.call(this)');
+    aTag.id = questionObject.id;
+    aTag.innerHTML = questionToList;
+    listDiv.appendChild(aTag);
 }
 

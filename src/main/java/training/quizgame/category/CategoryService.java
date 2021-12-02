@@ -3,6 +3,8 @@ package training.quizgame.category;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import training.quizgame.question.QuestionDTO;
+import training.quizgame.question.QuestionRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private CategoryRepository categoryRepository;
+
+    private QuestionRepository questionRepository;
 
     private ModelMapper modelMapper;
 
@@ -30,5 +34,13 @@ public class CategoryService {
         categoryRepository.save(category);
 
         return modelMapper.map(category, CategoryDTO.class);
+    }
+
+
+    public List<QuestionDTO> findOne(String id) {
+        return questionRepository.findAll().stream()
+                .filter(question -> question.getCategoryId().equals(id))
+                .map(question -> modelMapper.map(question, QuestionDTO.class))
+                .collect(Collectors.toList());
     }
 }

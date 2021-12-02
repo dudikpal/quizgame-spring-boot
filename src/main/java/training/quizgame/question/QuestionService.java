@@ -34,4 +34,20 @@ public class QuestionService {
 
         return modelMapper.map(question, QuestionDTO.class);
     }
+
+
+    public QuestionDTO findOne(String id) {
+        return modelMapper.map(questionRepository.findById(id).get(), QuestionDTO.class);
+    }
+
+
+    public void updateQuestion(String id, UpgradeQuestionCommand command) {
+        Question question = questionRepository.findById(id).get();
+
+        question.setQuestion(command.getQuestion());
+        question.setAnswers(command.getAnswers());
+        question.setCorrectAnswerIndex(command.getCorrectAnswerIndex());
+        question.setCategoryId(command.getCategoryId());
+        questionRepository.save(question);
+    }
 }

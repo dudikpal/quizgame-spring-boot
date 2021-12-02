@@ -1,6 +1,7 @@
 package training.quizgame.category;
 
 import org.springframework.web.bind.annotation.*;
+import training.quizgame.question.QuestionDTO;
 
 import java.util.List;
 
@@ -18,6 +19,13 @@ public class CategoryController {
     public List<CategoryDTO> findAll() {
         return categoryService.findAll();
     }
+
+
+    @GetMapping("/{id}")
+    public List<QuestionDTO> findOne(@PathVariable String id) {
+        return categoryService.findOne(id);
+    }
+
 
     @PostMapping
     public CategoryDTO createCategory(@RequestBody CreateCategoryCommand command) {

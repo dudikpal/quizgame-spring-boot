@@ -19,8 +19,20 @@ public class QuestionController {
     }
 
 
+    @GetMapping("/{id}")
+    public QuestionDTO findOne(@PathVariable String id) {
+        return questionService.findOne(id);
+    }
+
+
     @PostMapping
     public QuestionDTO createQuestion(@RequestBody CreateQuestionCommand command) {
         return questionService.create(command);
+    }
+
+
+    @PutMapping("/{id}")
+    public void updateQuestion(@PathVariable String id, @RequestBody UpgradeQuestionCommand command) {
+        questionService.updateQuestion(id, command);
     }
 }
