@@ -28,6 +28,7 @@ function fillCategoryToUpgradeQuestion(category) {
 
     option.id = category.id;
     option.name = 'selectCategory';
+    option.setAttribute('onclick', 'updateQuestion()');
     option.innerHTML = category.name;
 
     selectedCategory.appendChild(option);
@@ -190,12 +191,17 @@ function loadUpgradableQuestion() {
 
             document.querySelector('#question').value = questionText;
             let item = document.querySelector('#adminCategoriesList');
-            let item2 = item.querySelector('label');
-            item2.
+            //let item2 = item.querySelector(`label[for="` + upgradeQuestionId + `"]`);
             console.log(item)
-            console.log(item2)
-            console.log(item3)
+            //let item2 = item.querySelector('#619ec2f67f3222af371920ab');
+            let item3 = document.querySelector(`input[id="${upgradeQuestionId}"]`);
+            //item3.checked = true;
+            //console.log(item2)
+            //console.log('upgrade to thi id: ' + upgradeQuestionId)
+            console.log(item3.id)
             console.log(upgradeQuestionId)
+            //console.log(upgradeQuestionId)
+            //console.log(categoryId)
         })
 }
 
