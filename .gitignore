@@ -1,6 +1,6 @@
 .idea
 .git
-application.properties
+src/main/resources/application.properties
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
