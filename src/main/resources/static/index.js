@@ -1,8 +1,10 @@
 let url = '/api/categories';
-let listBox = document.querySelector("#categoriesList");
-
+let categoriesList = document.querySelector("#categories");
+const startButton = document.querySelector('.startBtn');
+startButton.setAttribute('onclick', 'startQuiz()');
 
 (function readAllCategories() {
+
     fetch(url)
         .then(function (response) {
             return response.json();
@@ -10,20 +12,33 @@ let listBox = document.querySelector("#categoriesList");
         .then(function(jsonData) {
             let categories = jsonData.valueOf();
             for (const category of categories) {
-                let label = document.createElement('label');
-                let checkbox = document.createElement('input');
+                let aTag = document.createElement('a');
 
-                label.setAttribute('for', category.id);
-                label.style.display = "block";
-                checkbox.type = 'checkbox';
-                checkbox.setAttribute('id', category.id);
+                aTag.setAttribute('id', category.id);
+                aTag.setAttribute('checked', 'false');
+                aTag.innerHTML = category.name;
 
+                aTag.setAttribute('onclick', 'selectCategories.call(this)');
 
-                label.appendChild(checkbox);
-                label.innerHTML += ' ' + category.name;
-                listBox.appendChild(label);
+                categoriesList.appendChild(aTag);
             }
         });
 })();
 
-//readAllCategories();
+
+function selectCategories() {
+
+    let checked = this.getAttribute('checked');
+    if (checked == 'true') {
+        this.setAttribute('checked', 'false');
+        this.style.backgroundColor = 'rgb(43, 128, 161)';
+    } else {
+        this.setAttribute('checked', 'true');
+        this.style.backgroundColor = 'rgb(241, 165, 0)';
+    }
+}
+
+
+function startQuiz() {
+    console.log('start')
+}

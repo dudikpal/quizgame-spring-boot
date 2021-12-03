@@ -28,7 +28,6 @@ function fillCategoryToUpgradeQuestion(category) {
 
     option.id = category.id;
     option.name = 'selectCategory';
-    option.setAttribute('onclick', 'updateQuestion()');
     option.innerHTML = category.name;
 
     selectedCategory.appendChild(option);
@@ -108,7 +107,7 @@ function createQuestion() {
     answer2.value = '';
     answer3.value = '';
     correctAnswerIndex.checked = false;
-    categoryId.checked = false;
+    //categoryId.checked = false;
 
 }
 
@@ -188,20 +187,12 @@ function loadUpgradableQuestion() {
                 answer.value = data.answers[i];
             }
             const correctAnswerIndex = data.correctAnswerIndex;
+            let categoryRadio = document.querySelector(`input[id="${categoryId}"]`);
+            let correctAnswerRadio = document.querySelector(`input[id="${correctAnswerIndex}"]`);
 
             document.querySelector('#question').value = questionText;
-            let item = document.querySelector('#adminCategoriesList');
-            //let item2 = item.querySelector(`label[for="` + upgradeQuestionId + `"]`);
-            console.log(item)
-            //let item2 = item.querySelector('#619ec2f67f3222af371920ab');
-            let item3 = document.querySelector(`input[id="${upgradeQuestionId}"]`);
-            //item3.checked = true;
-            //console.log(item2)
-            //console.log('upgrade to thi id: ' + upgradeQuestionId)
-            console.log(item3.id)
-            console.log(upgradeQuestionId)
-            //console.log(upgradeQuestionId)
-            //console.log(categoryId)
+            categoryRadio.checked = true;
+            correctAnswerRadio.checked = true;
         })
 }
 
