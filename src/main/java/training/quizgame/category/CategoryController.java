@@ -15,9 +15,16 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+
     @GetMapping
     public List<CategoryDTO> findAll() {
         return categoryService.findAll();
+    }
+
+
+    @GetMapping("/{id}/count")
+    public int numberOfQuestions(@PathVariable String id) {
+        return categoryService.numberOfQuestions(id);
     }
 
 

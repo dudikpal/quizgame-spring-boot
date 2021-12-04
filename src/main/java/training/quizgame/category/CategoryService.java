@@ -43,4 +43,10 @@ public class CategoryService {
                 .map(question -> modelMapper.map(question, QuestionDTO.class))
                 .collect(Collectors.toList());
     }
+
+    public int numberOfQuestions(String id) {
+        return (int)questionRepository.findAll().stream()
+                .filter(question -> question.getCategoryId().equals(id))
+                .count();
+    }
 }
