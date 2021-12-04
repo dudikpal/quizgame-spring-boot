@@ -32,7 +32,7 @@ function checkId(input) {
 
     for (let i = 0; i < input.length; i++) {
         let eachOption = input[i];
-        //eachOption.style.display = "block";
+        //eachOption.style.display = "block";   
         console.log(eachOption)
 
         if (input === categoryList){
@@ -71,11 +71,11 @@ function checkId(input) {
 
         /*catBtn.addEventListener("click", function(){
             if (eachOption.style.display === "none"){
-                eachOption.style.display = "block";
+                eachOption.style.display = "block";  
             } else {
-                eachOption.style.display = "none";
+                eachOption.style.display = "none";  
             }
-
+            
         }); */
     }
 }

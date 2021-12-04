@@ -5,6 +5,8 @@ let url = '/api/categories';
 let categoriesList = document.querySelector("#categories");
 const startButton = document.querySelector('.startBtn');
 startButton.setAttribute('onclick', 'startQuiz()');
+let selectedCategoriesId = null;
+let numberOfQuestions = 0;
 
 (function readAllCategories() {
 
@@ -49,7 +51,7 @@ async function startQuiz() {
             .getElementsByTagName('a')
     );
 
-    const selectedCategoriesId = (function () {
+    selectedCategoriesId = await (function () {
         let ids = [];
         for (let category of categoriesTagA) {
             if (category.getAttribute('checked') == 'true') {
@@ -59,7 +61,7 @@ async function startQuiz() {
         return ids;
     })();
 
-    const numberOfQuestions = +document.querySelector('#numberOfQuestions').value;
+    numberOfQuestions = +document.querySelector('#numberOfQuestions').value;
 
 
     let existQuestionsPerCategories = [];
@@ -78,11 +80,55 @@ async function startQuiz() {
     if (numberOfQuestions / existQuestionsPerCategories.length > Math.min(...existQuestionsPerCategories)) {
         window.alert('Not enough questions to this number');
     } else {
-        createGamePage();
+        document.querySelector('.selector').innerHTML = '';
+        loadGamePage();
+        //window.location = 'game.html';
     }
 }
 
 
-function createGamePage() {
-
+async function loadGamePage() {
+    const questionMap = await fillQuestionsArray()
+        .then(function(response) {
+            return response;
+        });
+    console.log(questionMap)
 }
+
+
+async function fillQuestionsArray() {
+    let questions = new Map();
+
+    for (const categoryId of selectedCategoriesId) {
+
+        const url = `/api/categories/${categoryId}`;
+        const response = await fetch(url);
+        const jsonData = await response.json();
+        let array = [];
+
+        for (const questionData of jsonData) {
+            const question = {
+                id: questionData.id,
+                categoryId: categoryId,
+                question: questionData.question,
+                correctAnswerIndex: questionData.correctAnswerIndex,
+                answers: questionData.answers
+            }
+            array.push(question);
+        }
+
+        for (let i = 0; i < numberOfQuestions / selectedCategoriesId.length; i++) {
+
+            let index = Math.floor(Math.random() * array.length);
+            let question = array[index];
+            while (questions.has(question.id)) {
+                index = Math.floor(Math.random() * array.length);
+                question = array[index];
+            }
+            questions.set(question.id, question);
+        }
+    }
+    return questions;
+}
+
+
