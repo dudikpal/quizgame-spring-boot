@@ -34,6 +34,12 @@ public class CategoryController {
     }
 
 
+    @GetMapping("/{id}/name")
+    public String getName(@PathVariable String id) {
+        return categoryService.getName(id);
+    }
+
+
     @PostMapping
     public CategoryDTO createCategory(@RequestBody CreateCategoryCommand command) {
         return categoryService.create(command);

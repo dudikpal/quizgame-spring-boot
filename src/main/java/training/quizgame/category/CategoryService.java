@@ -49,4 +49,9 @@ public class CategoryService {
                 .filter(question -> question.getCategoryId().equals(id))
                 .count();
     }
+
+
+    public String getName(String id) {
+        return categoryRepository.findById(id).get().getName();
+    }
 }

@@ -1,12 +1,12 @@
-//import {createGamePage} from './game';
-//const gamePage = require('game');
-
 let url = '/api/categories';
 let categoriesList = document.querySelector("#categories");
 const startButton = document.querySelector('.startBtn');
 startButton.setAttribute('onclick', 'startQuiz()');
 let selectedCategoriesId = null;
 let numberOfQuestions = 0;
+let categoryNames = new Map;
+let questionBlock = document.querySelector('.question-block');
+let questionMap = new Map;
 
 (function readAllCategories() {
 
@@ -28,6 +28,17 @@ let numberOfQuestions = 0;
                 categoriesList.appendChild(aTag);
             }
         });
+
+    fetch('/api/categories/')
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (jsonData) {
+            for (const category of jsonData) {
+                categoryNames.set(category.id, category.name)
+            }
+        });
+
 })();
 
 
@@ -51,7 +62,7 @@ async function startQuiz() {
             .getElementsByTagName('a')
     );
 
-    selectedCategoriesId = await (function () {
+    selectedCategoriesId = (function () {
         let ids = [];
         for (let category of categoriesTagA) {
             if (category.getAttribute('checked') == 'true') {
@@ -63,9 +74,7 @@ async function startQuiz() {
 
     numberOfQuestions = +document.querySelector('#numberOfQuestions').value;
 
-
     let existQuestionsPerCategories = [];
-
 
     for (const categoryId of selectedCategoriesId) {
 
@@ -75,24 +84,91 @@ async function startQuiz() {
         existQuestionsPerCategories.push(jsonData);
     }
 
-    console.log(`${numberOfQuestions} / ${existQuestionsPerCategories.length} > ${Math.min(...existQuestionsPerCategories)}`)
-    console.log(`existQuestionsPerCategories: ${existQuestionsPerCategories}`)
     if (numberOfQuestions / existQuestionsPerCategories.length > Math.min(...existQuestionsPerCategories)) {
         window.alert('Not enough questions to this number');
     } else {
         document.querySelector('.selector').innerHTML = '';
-        loadGamePage();
+        await loadGamePage();
         //window.location = 'game.html';
     }
 }
 
+let currentPage = 0;
 
 async function loadGamePage() {
-    const questionMap = await fillQuestionsArray()
+    questionMap = await fillQuestionsArray()
         .then(function(response) {
             return response;
         });
-    console.log(questionMap)
+    const selector = document.querySelector(".selector");
+    const section = document.querySelector("section");
+    selector.style.display = "none";
+    section.style.display = "flex";
+    //console.log(questionMap.keys())
+    await renderQuestionPage(questionMap);
+}
+
+
+async function renderQuestionPage(questionMap) {
+
+    const gameInfoCat = document.querySelector(".game-info1");
+    const keyset = Array.from(questionMap.keys());
+    const randomId = randomKey(keyset);
+    const question = questionMap.get(randomId);
+    questionMap.delete(randomId);
+    gameInfoCat.textContent = categoryNames.get(question.categoryId);
+
+    fillAnswersElements(question);
+}
+
+
+function fillAnswersElements(question) {
+
+    let questionP = document.createElement('p');
+    questionP.innerHTML = question.question;
+    const ul = document.createElement("ul");
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "nextBtn";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.classList = "reset";
+    nextBtn.textContent = "Next Question";
+    cancelBtn.textContent = "Reset Game";
+
+    questionBlock.appendChild(questionP);
+    questionBlock.appendChild(ul);
+    questionBlock.appendChild(cancelBtn);
+    questionBlock.appendChild(nextBtn);
+
+    const correctAnswerId = question.answers[question.correctAnswerIndex];
+    let answers = question.answers;
+    const loop = answers.length;
+
+    for (let i = 0; i < loop; i++) {
+        const li = document.createElement("li");
+        const spanLi = document.createElement("span")
+        const checkBtn = document.createElement("i");
+        checkBtn.className = "material-icons radio";
+        checkBtn.textContent = "radio_button_unchecked";
+        ul.appendChild(li);
+        li.appendChild(spanLi);
+        const index = randomKey(Object.keys(answers));
+        spanLi.innerHTML = answers[index];
+        answers.splice(index, 1);
+        li.appendChild(checkBtn);
+    }
+}
+
+
+function randomKey(keyset) {
+    let index = Math.floor(Math.random() * keyset.length);
+
+    let counter = 0;
+    for (const keysetElement of keyset) {
+        if (index === counter) {
+            return keysetElement;
+        }
+        counter++;
+    }
 }
 
 
