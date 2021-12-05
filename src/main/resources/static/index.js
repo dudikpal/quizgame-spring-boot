@@ -7,6 +7,8 @@ let numberOfQuestions = 0;
 let categoryNames = new Map;
 let questionBlock = document.querySelector('.question-block');
 let questionMap = new Map;
+let totalRight = 0;
+let allowNext = false;
 
 (function readAllCategories() {
 
@@ -102,6 +104,7 @@ async function loadGamePage() {
         });
     const selector = document.querySelector(".selector");
     const section = document.querySelector("section");
+
     selector.style.display = "none";
     section.style.display = "flex";
     //console.log(questionMap.keys())
@@ -119,6 +122,9 @@ async function renderQuestionPage(questionMap) {
     gameInfoCat.textContent = categoryNames.get(question.categoryId);
 
     fillAnswersElements(question);
+
+    selectAnswers();
+
 }
 
 
@@ -139,8 +145,8 @@ function fillAnswersElements(question) {
     questionBlock.appendChild(cancelBtn);
     questionBlock.appendChild(nextBtn);
 
-    const correctAnswerId = question.answers[question.correctAnswerIndex];
     let answers = question.answers;
+    const correctAnswer = answers[question.correctAnswerIndex];
     const loop = answers.length;
 
     for (let i = 0; i < loop; i++) {
@@ -148,20 +154,85 @@ function fillAnswersElements(question) {
         const spanLi = document.createElement("span")
         const checkBtn = document.createElement("i");
         checkBtn.className = "material-icons radio";
-        checkBtn.textContent = "radio_button_unchecked";
+        const index = randomKey(Object.keys(answers));
+
         ul.appendChild(li);
         li.appendChild(spanLi);
-        const index = randomKey(Object.keys(answers));
+        checkBtn.textContent = "radio_button_unchecked";
         spanLi.innerHTML = answers[index];
         answers.splice(index, 1);
         li.appendChild(checkBtn);
     }
+
+    nextBtn.addEventListener("click", function () {
+
+        if (allowNext === true) {
+            currentPage++;
+            checkAnswer(correctAnswer)
+            renderQuestionPage(questionMap);
+            //getInfo();
+            moveOn = false;
+            allowNext = false;
+        }
+    });
+
+}
+
+
+function selectAnswers() {
+
+    let answersLi = document.querySelectorAll("li");
+    let answersLiIcon = document.querySelectorAll("i");
+    //console.log(answersLi);
+
+    for (let j = 0; j < answersLi.length; j++) {
+        let eachAnswerBtn = answersLi[j];
+        let eachAnswerIcon = answersLiIcon[j];
+        //eachAnswerBtn.childNodes[1].textContent = "radio_button_unchecked";
+
+        eachAnswerBtn.addEventListener("click", function () {
+
+            for (let k = 0; k < answersLi.length; k++) {
+                let eachAnswerBtn = answersLi[k];
+                let eachAnswerIcon = answersLiIcon[k];
+                eachAnswerIcon.textContent = "radio_button_unchecked";
+                eachAnswerIcon.style.color = "rgb(128, 97, 57)";
+                eachAnswerBtn.className = "";
+
+
+            }
+            eachAnswerIcon.textContent = "radio_button_checked";
+            eachAnswerBtn.className = "active";
+            eachAnswerIcon.style.color = "rgb(128, 97, 57)";
+            allowNext = true;
+        })
+    }
+}
+
+
+function checkAnswer(correctAnswer) {
+
+    let answersLi = document.querySelectorAll("li span");
+    let answersLiIcon = document.querySelectorAll("i");
+    //console.log(answersLi);
+
+    for (let j = 0; j < answersLi.length; j++) {
+        let eachAnswer = answersLi[j]
+        let eachAnswerIcon = answersLiIcon[j];
+        console.log(eachAnswer.textContent)
+        if (eachAnswerIcon.textContent === "radio_button_checked") {
+            if (eachAnswer.textContent === correctAnswer) {
+                totalRight++;
+            }
+        }
+    }
+
 }
 
 
 function randomKey(keyset) {
     let index = Math.floor(Math.random() * keyset.length);
-
+    let shuffledArray = [keyset];
     let counter = 0;
     for (const keysetElement of keyset) {
         if (index === counter) {
