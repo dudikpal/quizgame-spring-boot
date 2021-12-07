@@ -19,14 +19,14 @@ public class Question {
 
     private String[] answers;
 
-    private int correctAnswerIndex;
+    private String correctAnswerId;
 
     private String categoryId;
 
-    public Question(String question, String[] answers, int correctAnswerIndex, String categoryId) {
+    public Question(String question, String[] answers, String correctAnswerId, String categoryId) {
         this.question = question;
         this.answers = answers;
-        this.correctAnswerIndex = correctAnswerIndex;
+        this.correctAnswerId = correctAnswerId;
         this.categoryId = categoryId;
     }
 }

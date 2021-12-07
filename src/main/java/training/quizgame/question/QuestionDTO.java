@@ -16,7 +16,7 @@ public class QuestionDTO {
 
     private String[] answers;
 
-    private int correctAnswerIndex;
+    private String correctAnswerId;
 
     private String categoryId;
 }

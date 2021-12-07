@@ -16,7 +16,7 @@ function readAllCategories() {
             for (const category of categories) {
                 fillCategoryToCreateQuestion(category);
                 // init dropdown with empty option
-                fillCategoryToUpgradeQuestion({id: 0, name: ""});
+                //fillCategoryToUpgradeQuestion({id: 0, name: ""});
                 fillCategoryToUpgradeQuestion(category);
             }
         });
@@ -31,8 +31,7 @@ function fillCategoryToUpgradeQuestion(category) {
     option.innerHTML = category.name;
 
     selectedCategory.appendChild(option);
-
-
+    selectedCategory.selectedIndex = -1;
 };
 
 function fillCategoryToCreateQuestion(category) {
@@ -63,14 +62,17 @@ function createQuestion() {
     const answer1 = document.querySelector('#answer-1');
     const answer2 = document.querySelector('#answer-2');
     const answer3 = document.querySelector('#answer-3');
-    const correctAnswerIndex = document.querySelector('input[name="correctAnswer"]:checked');
+    const correctAnswerId = document.querySelector('input[name="correctAnswer"]:checked');
     const categoryId = document.querySelector('input[name="groupCategories"]:checked');
+    const correctAnswer = eval(`answer${correctAnswerId.id}`);
+    console.log(correctAnswerId)
+    console.log(correctAnswer)
 
     let data = JSON.stringify(
         {
             "question": question.value,
             "answers": [answer0.value, answer1.value, answer2.value, answer3.value],
-            "correctAnswerIndex": correctAnswerIndex.id,
+            "correctAnswerId": correctAnswer.value,
             "categoryId": categoryId.id
         }
     );
@@ -106,7 +108,7 @@ function createQuestion() {
     answer1.value = '';
     answer2.value = '';
     answer3.value = '';
-    correctAnswerIndex.checked = false;
+    correctAnswerId.checked = false;
     //categoryId.checked = false;
 
 }
@@ -179,20 +181,23 @@ function loadUpgradableQuestion() {
         })
         .then(function (jsonData) {
             const data = jsonData.valueOf();
-            upgradeQuestionId = data.id;
             let categoryId = data.categoryId;
             let questionText = data.question;
+            const correctAnswerId = data.correctAnswerId;
+            let categoryRadio = document.querySelector(`input[id="${categoryId}"]`);
+
             for (let i = 0; i < 4; i++) {
                 let answer = document.querySelector(`#answer-${i}`);
+                if (data.answers[i] === correctAnswerId) {
+                let correctAnswerRadio = document.querySelector(`input[id="${i}"]`);
+                correctAnswerRadio.checked = true;
+                }
                 answer.value = data.answers[i];
             }
-            const correctAnswerIndex = data.correctAnswerIndex;
-            let categoryRadio = document.querySelector(`input[id="${categoryId}"]`);
-            let correctAnswerRadio = document.querySelector(`input[id="${correctAnswerIndex}"]`);
 
+            upgradeQuestionId = data.id;
             document.querySelector('#question').value = questionText;
             categoryRadio.checked = true;
-            correctAnswerRadio.checked = true;
         })
 }
 
@@ -200,12 +205,13 @@ function loadUpgradableQuestion() {
 function fillUpgradeQuestionList(questionObject) {
     let listDiv = document.querySelector('#selectQuestion');
     let questionToList = questionObject.question;
-    console.log(questionToList);
     let aTag = document.createElement('a');
+
     aTag.classList.add('list-group-item', 'list-group-item-action');
     aTag.setAttribute('onclick', 'loadUpgradableQuestion.call(this)');
     aTag.id = questionObject.id;
     aTag.innerHTML = questionToList;
+
     listDiv.appendChild(aTag);
 }
 

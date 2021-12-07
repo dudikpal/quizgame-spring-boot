@@ -27,7 +27,7 @@ public class QuestionService {
         Question question = new Question(
                 command.getQuestion(),
                 command.getAnswers(),
-                command.getCorrectAnswerIndex(),
+                command.getCorrectAnswerId(),
                 command.getCategoryId()
         );
         questionRepository.save(question);
@@ -46,7 +46,7 @@ public class QuestionService {
 
         question.setQuestion(command.getQuestion());
         question.setAnswers(command.getAnswers());
-        question.setCorrectAnswerIndex(command.getCorrectAnswerIndex());
+        question.setCorrectAnswerId(command.getCorrectAnswerId());
         question.setCategoryId(command.getCategoryId());
         questionRepository.save(question);
     }

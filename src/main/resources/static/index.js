@@ -1,181 +1,183 @@
-let url = '/api/categories';
-let categoriesList = document.querySelector("#categories");
-const startButton = document.querySelector('.startBtn');
-startButton.setAttribute('onclick', 'startQuiz()');
-let selectedCategoriesId = null;
-let numberOfQuestions = 0;
-let categoryNames = new Map;
-let questionBlock = document.querySelector('.question-block');
-let questionMap = new Map;
-let totalRight = 0;
-let allowNext = false;
-
-(function readAllCategories() {
-
-    fetch(url)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (jsonData) {
-            let categories = jsonData.valueOf();
-            for (const category of categories) {
-                let aTag = document.createElement('a');
-
-                aTag.setAttribute('id', category.id);
-                aTag.setAttribute('checked', 'false');
-                aTag.innerHTML = category.name;
-
-                aTag.setAttribute('onclick', 'selectCategories.call(this)');
-
-                categoriesList.appendChild(aTag);
-            }
-        });
-
-    fetch('/api/categories/')
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (jsonData) {
-            for (const category of jsonData) {
-                categoryNames.set(category.id, category.name)
-            }
-        });
-
-})();
-
-
-function selectCategories() {
-
-    let checked = this.getAttribute('checked');
-    if (checked == 'true') {
-        this.setAttribute('checked', 'false');
-        this.style.backgroundColor = 'rgb(43, 128, 161)';
-    } else {
-        this.setAttribute('checked', 'true');
-        this.style.backgroundColor = 'rgb(241, 165, 0)';
-    }
-}
-
-
-async function startQuiz() {
-
-    let categoriesTagA = Array.from(
-        document.querySelector('#categories')
-            .getElementsByTagName('a')
-    );
-
-    selectedCategoriesId = (function () {
-        let ids = [];
-        for (let category of categoriesTagA) {
-            if (category.getAttribute('checked') == 'true') {
-                ids.push(category.id);
-            }
-        }
-        return ids;
-    })();
-
-    numberOfQuestions = +document.querySelector('#numberOfQuestions').value;
-
-    let existQuestionsPerCategories = [];
-
-    for (const categoryId of selectedCategoriesId) {
-
-        const response = await fetch("/api/categories/" + categoryId + "/count");
-        const jsonData = await response.json();
-
-        existQuestionsPerCategories.push(jsonData);
-    }
-
-    if (numberOfQuestions / existQuestionsPerCategories.length > Math.min(...existQuestionsPerCategories)) {
-        window.alert('Not enough questions to this number');
-    } else {
-        document.querySelector('.selector').innerHTML = '';
-        await loadGamePage();
-        //window.location = 'game.html';
-    }
-}
-
+const questionBlock = document.querySelector(".question-block");
+let counter = document.querySelector(".counter");
+let number = document.querySelector(".number");
+const categoryList = new Map;
+const levelList = document.querySelectorAll(".one.level a");
+const startButton = document.querySelector(".startBtn");
+const selector = document.querySelector(".selector");
+const section = document.querySelector("section");
+const url = '/api/questions';
+const allInfo = getInfo();
 let currentPage = 0;
+let totalRight = 0;
+let moveOn = false;
+let idCategory = "";
+let level = "";
+let allowNext = false;
+let nameCategory = "";
+let levelText = "";
+let data;
+let maxPage = 10;
 
-async function loadGamePage() {
-    questionMap = await fillQuestionsArray()
-        .then(function(response) {
-            return response;
-        });
-    const selector = document.querySelector(".selector");
-    const section = document.querySelector("section");
+
+initCategories();
+//console.log(allInfo.valueOf())
+
+function initCategories() {
+    fetch('/api/categories')
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (jsonData) {
+            let categoriesDiv = document.querySelector('.one.category');
+
+            for (const category of jsonData) {
+                categoryList.set(category.id, category.name);
+                let aTag = document.createElement('a');
+                aTag.id = category.id;
+                aTag.innerHTML = category.name;
+                categoriesDiv.appendChild(aTag);
+                aTag.addEventListener("click", function () {
+
+                    idCategory = category.id;
+                    if (aTag.className == "active") {
+                        aTag.className = "";
+                    } else {
+                        aTag.className = "active";
+                    }
+                    console.log(idCategory)
+
+                });
+            }
+            console.log(jsonData.length);
+        })
+}
+
+
+startButton.addEventListener("click", function () {
 
     selector.style.display = "none";
+    getInfo()
+    .then(render);
+
+})
+
+// maxPage = numberOfQuestions
+// idCategory = categoryId
+// level = ?
+function getInfo() { //getting all the data from API
+
+    return fetch(url)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (jsonData) {
+            return jsonData;
+        })
+        .catch( () => {
+            alert("Server is not available! Try again in a few moment.")
+        })
+}
+
+// render the data from API
+function render(info) {
+
     section.style.display = "flex";
-    //console.log(questionMap.keys())
-    await renderQuestionPage(questionMap);
-}
 
+    if (currentPage <= maxPage - 1) {
+        setTimeout(function () {
+            counter.style.display = "block";
+            number.textContent = currentPage + 1;
+        }, 40)
 
-async function renderQuestionPage(questionMap) {
+        questionBlock.innerHTML = "";
+        let eachData = info[currentPage];
 
-    const gameInfoCat = document.querySelector(".game-info1");
-    const keyset = Array.from(questionMap.keys());
-    const randomId = randomKey(keyset);
-    const question = questionMap.get(randomId);
-    questionMap.delete(randomId);
-    gameInfoCat.textContent = categoryNames.get(question.categoryId);
+        const gameInfoCat = document.querySelector(".game-info1");
+        const gameInfoLev = document.querySelector(".game-info2");
+        const pQuestion = document.createElement("p");
+        const ul = document.createElement("ul");
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "nextBtn";
+        const cancelBtn = document.createElement("button");
+        cancelBtn.classList = "reset";
+        nextBtn.textContent = "Next Question";
+        cancelBtn.textContent = "Reset Game";
+        pQuestion.innerHTML = eachData.question;
 
-    fillAnswersElements(question);
+        gameInfoCat.textContent = categoryList.get(eachData.categoryId);
+        gameInfoLev.textContent = levelText;
+        questionBlock.appendChild(pQuestion);
+        questionBlock.appendChild(ul);
+        questionBlock.appendChild(cancelBtn);
+        questionBlock.appendChild(nextBtn);
 
-    selectAnswers();
+        //new array with first data in the array is the correct answer API
+        let answers = [];
 
-}
+        //pushing new data to the array with incorrect answer from the API
+        for (let j = 0; j < eachData.answers.length; j++) {
+            answers.push(eachData.answers[j]);
+        }
 
+        // shuffle the answers array
+        answers = shuffle(answers);
 
-function fillAnswersElements(question) {
+        //looping through the answers array to print out the list of answers to the DOM
+        // all the wrong anwers
+        for (let k = 0; k < answers.length; k++) {
+            const li = document.createElement("li");
+            const spanLi = document.createElement("span")
+            const checkBtn = document.createElement("i");
+            checkBtn.className = "material-icons radio";
+            checkBtn.textContent = "radio_button_unchecked";
+            ul.appendChild(li);
+            li.appendChild(spanLi);
+            spanLi.innerHTML = answers[k];
+            li.appendChild(checkBtn);
+        }
 
-    let questionP = document.createElement('p');
-    questionP.innerHTML = question.question;
-    const ul = document.createElement("ul");
-    const nextBtn = document.createElement("button");
-    nextBtn.className = "nextBtn";
-    const cancelBtn = document.createElement("button");
-    cancelBtn.classList = "reset";
-    nextBtn.textContent = "Next Question";
-    cancelBtn.textContent = "Reset Game";
+        if (moveOn === false) {
+            selectAnswers()
+        }
 
-    questionBlock.appendChild(questionP);
-    questionBlock.appendChild(ul);
-    questionBlock.appendChild(cancelBtn);
-    questionBlock.appendChild(nextBtn);
+        nextBtn.addEventListener("click", function () {
 
-    let answers = question.answers;
-    const correctAnswer = answers[question.correctAnswerIndex];
-    const loop = answers.length;
+            if (allowNext === true) {
+                console.log('nextbtn listener')
+                currentPage++;
+                checkAnswer(eachData)
+                render(info);
+                moveOn = false;
+                allowNext = false;
+            }
+        })
 
-    for (let i = 0; i < loop; i++) {
-        const li = document.createElement("li");
-        const spanLi = document.createElement("span")
-        const checkBtn = document.createElement("i");
-        checkBtn.className = "material-icons radio";
-        const index = randomKey(Object.keys(answers));
+        cancelBtn.addEventListener("click", resetGame);
 
-        ul.appendChild(li);
-        li.appendChild(spanLi);
-        checkBtn.textContent = "radio_button_unchecked";
-        spanLi.innerHTML = answers[index];
-        answers.splice(index, 1);
-        li.appendChild(checkBtn);
     }
 
-    nextBtn.addEventListener("click", function () {
+    if (currentPage === maxPage - 1) {
+        selectAnswers();
+        checkAnswer(info);
+        let cancelBtn = document.querySelector(".question-block button.reset");
+        cancelBtn.style.display = "none";
+        finalPage();
+    }
 
-        if (allowNext === true) {
-            currentPage++;
-            checkAnswer(correctAnswer)
-            renderQuestionPage(questionMap);
-            //getInfo();
-            moveOn = false;
-            allowNext = false;
-        }
-    });
+}
 
+
+function shuffle(array) {
+
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * i)
+        const temp = array[i]
+        array[i] = array[j]
+        array[j] = temp
+    }
+
+    return array;
 }
 
 
@@ -183,7 +185,7 @@ function selectAnswers() {
 
     let answersLi = document.querySelectorAll("li");
     let answersLiIcon = document.querySelectorAll("i");
-    //console.log(answersLi);
+    console.log(answersLi);
 
     for (let j = 0; j < answersLi.length; j++) {
         let eachAnswerBtn = answersLi[j];
@@ -198,7 +200,7 @@ function selectAnswers() {
                 eachAnswerIcon.textContent = "radio_button_unchecked";
                 eachAnswerIcon.style.color = "rgb(128, 97, 57)";
                 eachAnswerBtn.className = "";
-
+              
 
             }
             eachAnswerIcon.textContent = "radio_button_checked";
@@ -210,7 +212,7 @@ function selectAnswers() {
 }
 
 
-function checkAnswer(correctAnswer) {
+function checkAnswer(info) {
 
     let answersLi = document.querySelectorAll("li span");
     let answersLiIcon = document.querySelectorAll("i");
@@ -221,7 +223,7 @@ function checkAnswer(correctAnswer) {
         let eachAnswerIcon = answersLiIcon[j];
         console.log(eachAnswer.textContent)
         if (eachAnswerIcon.textContent === "radio_button_checked") {
-            if (eachAnswer.textContent === correctAnswer) {
+            if (eachAnswer.textContent === info.correctAnswerId) {
                 totalRight++;
             }
         }
@@ -230,52 +232,50 @@ function checkAnswer(correctAnswer) {
 }
 
 
-function randomKey(keyset) {
-    let index = Math.floor(Math.random() * keyset.length);
-    let shuffledArray = [keyset];
-    let counter = 0;
-    for (const keysetElement of keyset) {
-        if (index === counter) {
-            return keysetElement;
-        }
-        counter++;
-    }
+function finalPage() {
+    let p = document.querySelector(".question-block p");
+    let finalBtn = document.querySelector(".question-block button.nextBtn")
+    let ul = document.querySelector("ul");
+    
+    let li = document.querySelector("li");
+    finalBtn.textContent = "Check your answers!";
+
+    finalBtn.addEventListener("click", function () {
+        let section = document.querySelector("section");
+        section.style.flexFlow = "column wrap";
+        let questionBlock = document.querySelector(".question-block");
+        questionBlock.style.padding = "30px 40px 20px 40px";
+        //if (allowNext === true){
+        let p1 = document.createElement("p");
+        p1.className = "score-num";
+        let p2 = document.createElement("p");
+        p2.className = "score-text";
+        questionBlock.appendChild(p1);
+        questionBlock.appendChild(p2);
+        
+        p.style.display = "none"
+        questionBlock.removeChild(ul)
+        ul.removeChild(li);
+        let sectionH3 = document.querySelector("section h3");
+        sectionH3.textContent = "Result"
+        p1.textContent = totalRight;
+        p2.textContent = "correct answers";
+        finalBtn.style.display = "none";
+        counter.style.display = "none";
+
+        let resetBtn = document.createElement("button");
+        resetBtn.textContent = "Play Again!";
+        resetBtn.className = "endButton"
+        questionBlock.appendChild(resetBtn);
+
+        resetBtn.addEventListener("click", resetGame);
+        allowNext = false;
+        moveOn = true;
+        //}
+
+    })
 }
 
-
-async function fillQuestionsArray() {
-    let questions = new Map();
-
-    for (const categoryId of selectedCategoriesId) {
-
-        const url = `/api/categories/${categoryId}`;
-        const response = await fetch(url);
-        const jsonData = await response.json();
-        let array = [];
-
-        for (const questionData of jsonData) {
-            const question = {
-                id: questionData.id,
-                categoryId: categoryId,
-                question: questionData.question,
-                correctAnswerIndex: questionData.correctAnswerIndex,
-                answers: questionData.answers
-            }
-            array.push(question);
-        }
-
-        for (let i = 0; i < numberOfQuestions / selectedCategoriesId.length; i++) {
-
-            let index = Math.floor(Math.random() * array.length);
-            let question = array[index];
-            while (questions.has(question.id)) {
-                index = Math.floor(Math.random() * array.length);
-                question = array[index];
-            }
-            questions.set(question.id, question);
-        }
-    }
-    return questions;
+function resetGame() {
+    location.reload();
 }
-
-
