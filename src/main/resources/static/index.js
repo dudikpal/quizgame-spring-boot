@@ -7,7 +7,7 @@ const startButton = document.querySelector(".startBtn");
 const selector = document.querySelector(".selector");
 const section = document.querySelector("section");
 const url = '/api/questions';
-const allInfo = getInfo();
+
 let currentPage = 0;
 let totalRight = 0;
 let moveOn = false;
@@ -17,48 +17,72 @@ let allowNext = false;
 let nameCategory = "";
 let levelText = "";
 let data;
-let maxPage = 10;
+let maxPage = 0;
+let allQuestions = new Map;
 
 
 initCategories();
-//console.log(allInfo.valueOf())
 
-function initCategories() {
-    fetch('/api/categories')
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (jsonData) {
-            let categoriesDiv = document.querySelector('.one.category');
 
-            for (const category of jsonData) {
-                categoryList.set(category.id, category.name);
-                let aTag = document.createElement('a');
-                aTag.id = category.id;
-                aTag.innerHTML = category.name;
-                categoriesDiv.appendChild(aTag);
-                aTag.addEventListener("click", function () {
+async function initCategories() {
+    const categoryResponse = await fetch('/api/categories')
+    const categoryJsonData = await categoryResponse.json();
+    let categoriesDiv = document.querySelector('.one.category');
 
-                    idCategory = category.id;
-                    if (aTag.className == "active") {
-                        aTag.className = "";
-                    } else {
-                        aTag.className = "active";
-                    }
-                    console.log(idCategory)
-
-                });
+    for (const category of categoryJsonData) {
+        categoryList.set(category.id, category.name);
+        let aTag = document.createElement('a');
+        aTag.id = category.id;
+        aTag.innerHTML = category.name;
+        categoriesDiv.appendChild(aTag);
+        aTag.addEventListener("click", function () {
+            idCategory = category.id;
+            if (aTag.className == "active") {
+                aTag.className = "";
+            } else {
+                aTag.className = "active";
             }
-            console.log(jsonData.length);
-        })
+            checkPossibleNumberOfQuestions();
+        });
+    }
+
+    const allQuestionJsonData = await getInfo();
+
+    for (const question of allQuestionJsonData) {
+        if (allQuestions.has(question.categoryId)) {
+            allQuestions.get(question.categoryId).push(question);
+        } else {
+            allQuestions.set(question.categoryId, []);
+            allQuestions.get(question.categoryId).push(question);
+        }
+    }
+}
+
+
+function checkPossibleNumberOfQuestions() {
+    const activeCategories = document.querySelectorAll('.one.category a[class~=active]');
+    let maxPossibleQuestion = document.querySelector('#maxPossibleQuestion');
+    maxPage = document.querySelector('#numberOfQuestions').value;
+    const numberOfQuestionPerCategory = [];
+    for (const activeCategory of activeCategories) {
+        numberOfQuestionPerCategory.push(allQuestions.get(activeCategory.id).length);
+    }
+    const maxQuestionOfCategory = Math.min(...numberOfQuestionPerCategory);
+    if (Math.floor(maxPage / activeCategories.length) > maxQuestionOfCategory) {
+        maxPage = maxQuestionOfCategory * activeCategories.length;
+    }
+    maxPossibleQuestion.innerHTML = maxPage;
+    console.log(maxPage)
 }
 
 
 startButton.addEventListener("click", function () {
 
+    checkPossibleNumberOfQuestions();
     selector.style.display = "none";
     getInfo()
     .then(render);
+
 
 })
 
@@ -77,6 +101,7 @@ function getInfo() { //getting all the data from API
         .catch( () => {
             alert("Server is not available! Try again in a few moment.")
         })
+
 }
 
 // render the data from API
@@ -129,8 +154,10 @@ function render(info) {
             const li = document.createElement("li");
             const spanLi = document.createElement("span")
             const checkBtn = document.createElement("i");
+            const totalpages = document.querySelector('#totalpages');
             checkBtn.className = "material-icons radio";
-            checkBtn.textContent = "radio_button_unchecked";
+            checkBtn.textContent = "radio_button_unchecked"
+            totalpages.innerHTML = maxPage;
             ul.appendChild(li);
             li.appendChild(spanLi);
             spanLi.innerHTML = answers[k];
@@ -236,8 +263,9 @@ function finalPage() {
     let p = document.querySelector(".question-block p");
     let finalBtn = document.querySelector(".question-block button.nextBtn")
     let ul = document.querySelector("ul");
-    
+    const gameinfoclass = document.querySelector('.game-info');
     let li = document.querySelector("li");
+    gameinfoclass.innerHTML = '';
     finalBtn.textContent = "Check your answers!";
 
     finalBtn.addEventListener("click", function () {
@@ -245,7 +273,7 @@ function finalPage() {
         section.style.flexFlow = "column wrap";
         let questionBlock = document.querySelector(".question-block");
         questionBlock.style.padding = "30px 40px 20px 40px";
-        //if (allowNext === true){
+
         let p1 = document.createElement("p");
         p1.className = "score-num";
         let p2 = document.createElement("p");
@@ -259,7 +287,7 @@ function finalPage() {
         let sectionH3 = document.querySelector("section h3");
         sectionH3.textContent = "Result"
         p1.textContent = totalRight;
-        p2.textContent = "correct answers";
+        p2.textContent = `correct answers from ${maxPage} questions`;
         finalBtn.style.display = "none";
         counter.style.display = "none";
 
