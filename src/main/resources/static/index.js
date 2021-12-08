@@ -98,7 +98,7 @@ function selectRandomQuestions() {
         let categoryQuestions = allQuestions.get(category.id);
         let randomIndex = createRandomNumber(categoryQuestions.length);
         for (let i = 0; i < maxPage / activeCategories.length; i++) {
-            while(questions.includes(categoryQuestions[randomIndex])) {
+            while (questions.includes(categoryQuestions[randomIndex])) {
                 randomIndex = createRandomNumber(categoryQuestions.length);
             }
             questions.push(categoryQuestions[randomIndex]);
@@ -126,7 +126,7 @@ function getInfo() { //getting all the data from API
         .then(function (jsonData) {
             return jsonData;
         })
-        .catch( () => {
+        .catch(() => {
             alert("Server is not available! Try again in a few moment.")
         })
 
@@ -185,7 +185,12 @@ function render(questions) {
             const checkBtn = document.createElement("i");
             const totalpages = document.querySelector('#totalpages');
             checkBtn.className = "material-icons radio";
-            checkBtn.textContent = "radio_button_unchecked"
+            checkBtn.textContent = "radio_button_unchecked";
+            spanLi.style.fontWeight = 'bold';
+            //spanLi.setAttribute('onselectstart', 'return false');
+            //spanLi.setAttribute('user-select', 'none');
+            spanLi.classList.add('disable-select');
+            checkBtn.classList.add('disable-select');
             totalpages.innerHTML = maxPage;
             ul.appendChild(li);
             li.appendChild(spanLi);
@@ -199,13 +204,14 @@ function render(questions) {
 
         nextBtn.addEventListener("click", function () {
 
+                console.log('nextbtn listener begin: ' + allowNext)
             if (allowNext === true) {
-                //console.log('nextbtn listener')
                 currentPage++;
                 checkAnswer(question)
                 render(questions);
                 moveOn = false;
                 allowNext = false;
+                console.log('nextbtn listener end: ' + allowNext)
             }
         });
 
@@ -213,10 +219,11 @@ function render(questions) {
     }
 
     if (currentPage === maxPage - 1) {
-        allowNext = false;
+        console.log('lastpage before selectanswer: ' + allowNext)
         selectAnswers();
-
+        console.log('lastpage after selectanswer: ' + allowNext)
         checkAnswer(questions);
+        //allowNext = false;
         let cancelBtn = document.querySelector(".question-block button.reset");
         cancelBtn.style.display = "none";
         finalPage();
@@ -286,49 +293,53 @@ function checkAnswer(info) {
 
 
 function finalPage() {
+    //allowNext = false;
+    console.log('finalpage begin: ' + allowNext)
     let p = document.querySelector(".question-block p");
     let finalBtn = document.querySelector(".question-block button.nextBtn")
     let ul = document.querySelector("ul");
     let li = document.querySelector("li");
-    finalBtn.textContent = "Check your answers!";
+    finalBtn.textContent = "Check your answers!"
+    //selectAnswers();
+    //if (allowNext === true) {
+        finalBtn.addEventListener("click", function () {
+            console.log('finalbuttonlistener: ' + allowNext)
+            let section = document.querySelector("section");
+            section.style.flexFlow = "column wrap";
+            let questionBlock = document.querySelector(".question-block");
+            questionBlock.style.padding = "30px 40px 20px 40px";
+            //if (allowNext === true){
+                let p1 = document.createElement("p");
+                p1.className = "score-num";
+                let p2 = document.createElement("p");
+                p2.className = "score-text";
+                questionBlock.appendChild(p1);
+                questionBlock.appendChild(p2);
 
-    finalBtn.addEventListener("click", function () {
+                p.style.display = "none"
+                questionBlock.removeChild(ul)
+                ul.removeChild(li);
+                let sectionH3 = document.querySelector("section h3");
+                const gameinfoclass = document.querySelector('.game-info');
+                gameinfoclass.innerHTML = '';
+                sectionH3.textContent = "Result"
+                p1.textContent = totalRight;
+                p2.textContent = `correct answers from ${maxPage} questions`;
+                finalBtn.style.display = "none";
+                counter.style.display = "none";
 
-        let section = document.querySelector("section");
-        section.style.flexFlow = "column wrap";
-        let questionBlock = document.querySelector(".question-block");
-        questionBlock.style.padding = "30px 40px 20px 40px";
+                let resetBtn = document.createElement("button");
+                resetBtn.textContent = "Play Again!";
+                resetBtn.className = "endButton"
+                questionBlock.appendChild(resetBtn);
 
-        let p1 = document.createElement("p");
-        p1.className = "score-num";
-        let p2 = document.createElement("p");
-        p2.className = "score-text";
-        questionBlock.appendChild(p1);
-        questionBlock.appendChild(p2);
+                resetBtn.addEventListener("click", rePlayGame);
+                allowNext = false;
+                moveOn = true;
+            //}
 
-        p.style.display = "none"
-        questionBlock.removeChild(ul)
-        ul.removeChild(li);
-        let sectionH3 = document.querySelector("section h3");
-        const gameinfoclass = document.querySelector('.game-info');
-        gameinfoclass.innerHTML = '';
-        sectionH3.textContent = "Result"
-        p1.textContent = totalRight;
-        p2.textContent = `correct answers from ${maxPage} questions`;
-        finalBtn.style.display = "none";
-        counter.style.display = "none";
-
-        let resetBtn = document.createElement("button");
-        resetBtn.textContent = "Play Again!";
-        resetBtn.className = "endButton"
-        questionBlock.appendChild(resetBtn);
-
-        resetBtn.addEventListener("click", rePlayGame);
-        allowNext = false;
-        moveOn = true;
-        //}
-
-    })
+        })
+    //}
 }
 
 function resetGame() {
