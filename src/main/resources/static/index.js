@@ -7,6 +7,7 @@ const selector = document.querySelector(".selector");
 const section = document.querySelector("section");
 const url = '/api/questions';
 
+let inputNumberOfQuestions = 0;
 let activeCategories = [];
 let currentPage = 0;
 let totalRight = 0;
@@ -27,6 +28,8 @@ async function loadDatabaseToMap() {
     const categoryResponse = await fetch('/api/categories')
     const categoryJsonData = await categoryResponse.json();
     let categoriesDiv = document.querySelector('.one.category');
+    let possibleNumberOfQuestions = document.querySelector('#maxPossibleQuestion');
+    possibleNumberOfQuestions.innerHTML = 0;
 
     for (const category of categoryJsonData) {
         categoryList.set(category.id, category.name);
@@ -43,6 +46,7 @@ async function loadDatabaseToMap() {
             } else {
                 aTag.className = "active";
             }
+
             checkPossibleNumberOfQuestions();
         });
     }
@@ -61,6 +65,7 @@ async function loadDatabaseToMap() {
 
 
 function checkPossibleNumberOfQuestions() {
+
     activeCategories = document.querySelectorAll('.one.category a[class~=active]');
     let maxPossibleQuestion = document.querySelector('#maxPossibleQuestion');
     const numberOfQuestionInput = document.querySelector('#numberOfQuestions');
@@ -73,14 +78,18 @@ function checkPossibleNumberOfQuestions() {
 
     const maxQuestionOfCategory = Math.min(...numberOfQuestionPerCategory);
 
-    if (Math.floor(maxPage / activeCategories.length) > maxQuestionOfCategory) {
-        maxPage = maxQuestionOfCategory * activeCategories.length;
-    }
+    maxPage = maxQuestionOfCategory * activeCategories.length;
+
     numberOfQuestionInput.setAttribute('step', activeCategories.length);
     numberOfQuestionInput.setAttribute('min', activeCategories.length);
     numberOfQuestionInput.setAttribute('max', maxPage);
-    numberOfQuestionInput.value = maxPage;
-    maxPossibleQuestion.innerHTML = maxPage;
+    if (!maxPage) {
+        numberOfQuestionInput.value = '0';
+        maxPossibleQuestion.innerHTML = '0';
+    } else {
+        numberOfQuestionInput.value = maxPage;
+        maxPossibleQuestion.innerHTML = maxPage;
+    }
 }
 
 
@@ -92,17 +101,28 @@ startButton.addEventListener("click", function () {
 })
 
 function selectRandomQuestions() {
+    inputNumberOfQuestions = document.querySelector('#numberOfQuestions').value;
+
+    if (inputNumberOfQuestions > maxPage) {
+        inputNumberOfQuestions = maxPage;
+    }
+    if (inputNumberOfQuestions < 1) {
+        inputNumberOfQuestions = activeCategories.length;
+    }
     let questions = [];
+
     for (const category of activeCategories) {
         let categoryQuestions = allQuestions.get(category.id);
-        let randomIndex = createRandomNumber(categoryQuestions.length);
-        for (let i = 0; i < maxPage / activeCategories.length; i++) {
-            while (questions.includes(categoryQuestions[randomIndex])) {
+        for (let i = 0; i < inputNumberOfQuestions / activeCategories.length; i++) {
+            /*while (questions.includes(categoryQuestions[randomIndex])) {
                 randomIndex = createRandomNumber(categoryQuestions.length);
-            }
+            }*/
+        let randomIndex = createRandomNumber(categoryQuestions.length);
             questions.push(categoryQuestions[randomIndex]);
+            allQuestions.get(category.id).splice(randomIndex, 1);
         }
     }
+
     shuffle(questions);
     return questions;
 }
@@ -131,6 +151,7 @@ function getInfo() { //getting all the data from API
 function render(questions) {
 
     section.style.display = "flex";
+    maxPage = inputNumberOfQuestions;
 
     if (currentPage <= maxPage - 1) {
         setTimeout(function () {
@@ -179,7 +200,6 @@ function render(questions) {
             const totalpages = document.querySelector('#totalpages');
             checkBtn.className = "material-icons radio";
             checkBtn.textContent = "radio_button_unchecked";
-            spanLi.style
             spanLi.classList.add('disable-select');
             spanLi.style.fontSize = '22px';
             spanLi.style.fontWeight = 'bolder';
@@ -267,7 +287,8 @@ function checkAnswer(info) {
         let eachAnswerIcon = answersLiIcon[j];
 
         if (eachAnswer.textContent === info.correctAnswerId) {
-            console.log(eachAnswer.textContent);
+            // log correct answer
+            //console.log(eachAnswer.textContent);
 
             if (eachAnswerIcon.textContent === "radio_button_checked") {
                 totalRight++;
@@ -324,8 +345,9 @@ function finalPage() {
 
 
 function resetGame() {
-    alert('Are you sure reset game?');
-    location.reload();
+    if (confirm('Are you sure reset game?')) {
+        location.reload();
+    }
 }
 
 
