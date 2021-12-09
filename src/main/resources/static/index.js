@@ -14,17 +14,16 @@ let moveOn = false;
 let idCategory = "";
 let level = "";
 let allowNext = false;
-let nameCategory = "";
 let levelText = "";
 let data;
 let maxPage = 0;
 let allQuestions = new Map;
 
 
-initCategories();
+loadDatabaseToMap();
 
 
-async function initCategories() {
+async function loadDatabaseToMap() {
     const categoryResponse = await fetch('/api/categories')
     const categoryJsonData = await categoryResponse.json();
     let categoriesDiv = document.querySelector('.one.category');
@@ -64,6 +63,7 @@ async function initCategories() {
 function checkPossibleNumberOfQuestions() {
     activeCategories = document.querySelectorAll('.one.category a[class~=active]');
     let maxPossibleQuestion = document.querySelector('#maxPossibleQuestion');
+    const numberOfQuestionInput = document.querySelector('#numberOfQuestions');
     const numberOfQuestionPerCategory = [];
     maxPage = document.querySelector('#numberOfQuestions').value;
 
@@ -76,20 +76,19 @@ function checkPossibleNumberOfQuestions() {
     if (Math.floor(maxPage / activeCategories.length) > maxQuestionOfCategory) {
         maxPage = maxQuestionOfCategory * activeCategories.length;
     }
-
+    numberOfQuestionInput.setAttribute('step', activeCategories.length);
+    numberOfQuestionInput.setAttribute('min', activeCategories.length);
+    numberOfQuestionInput.setAttribute('max', maxPage);
+    numberOfQuestionInput.value = maxPage;
     maxPossibleQuestion.innerHTML = maxPage;
 }
 
 
 startButton.addEventListener("click", function () {
 
-    checkPossibleNumberOfQuestions();
+    //checkPossibleNumberOfQuestions();
     selector.style.display = "none";
-    /*getInfo()
-    .then(render);*/
-
     render(selectRandomQuestions(allQuestions));
-
 })
 
 function selectRandomQuestions() {
@@ -103,20 +102,17 @@ function selectRandomQuestions() {
             }
             questions.push(categoryQuestions[randomIndex]);
         }
-
-        //console.log(questions)
     }
+    shuffle(questions);
     return questions;
 }
+
 
 function createRandomNumber(maxNumber) {
     return Math.floor(Math.random() * maxNumber);
 }
 
 
-// maxPage = numberOfQuestions
-// idCategory = categoryId
-// level = ?
 function getInfo() { //getting all the data from API
 
     return fetch(url)
@@ -129,7 +125,6 @@ function getInfo() { //getting all the data from API
         .catch(() => {
             alert("Server is not available! Try again in a few moment.")
         })
-
 }
 
 // render the data from API
@@ -147,7 +142,6 @@ function render(questions) {
         let question = questions[currentPage];
 
         const gameInfoCat = document.querySelector(".game-info1");
-        const gameInfoLev = document.querySelector(".game-info2");
         const pQuestion = document.createElement("p");
         const ul = document.createElement("ul");
         const nextBtn = document.createElement("button");
@@ -160,7 +154,6 @@ function render(questions) {
         pQuestion.innerHTML = question.question;
 
         gameInfoCat.textContent = categoryList.get(question.categoryId);
-        gameInfoLev.textContent = levelText;
         questionBlock.appendChild(pQuestion);
         questionBlock.appendChild(ul);
         questionBlock.appendChild(cancelBtn);
@@ -186,10 +179,10 @@ function render(questions) {
             const totalpages = document.querySelector('#totalpages');
             checkBtn.className = "material-icons radio";
             checkBtn.textContent = "radio_button_unchecked";
-            spanLi.style.fontWeight = 'bold';
-            //spanLi.setAttribute('onselectstart', 'return false');
-            //spanLi.setAttribute('user-select', 'none');
+            spanLi.style
             spanLi.classList.add('disable-select');
+            spanLi.style.fontSize = '22px';
+            spanLi.style.fontWeight = 'bolder';
             checkBtn.classList.add('disable-select');
             totalpages.innerHTML = maxPage;
             ul.appendChild(li);
@@ -204,31 +197,24 @@ function render(questions) {
 
         nextBtn.addEventListener("click", function () {
 
-                console.log('nextbtn listener begin: ' + allowNext)
             if (allowNext === true) {
                 currentPage++;
-                checkAnswer(question)
+                checkAnswer(question);
                 render(questions);
                 moveOn = false;
                 allowNext = false;
-                console.log('nextbtn listener end: ' + allowNext)
             }
         });
-
         cancelBtn.addEventListener("click", resetGame);
     }
 
     if (currentPage === maxPage - 1) {
-        console.log('lastpage before selectanswer: ' + allowNext)
         selectAnswers();
-        console.log('lastpage after selectanswer: ' + allowNext)
         checkAnswer(questions);
-        //allowNext = false;
         let cancelBtn = document.querySelector(".question-block button.reset");
         cancelBtn.style.display = "none";
         finalPage();
     }
-
 }
 
 
@@ -240,7 +226,6 @@ function shuffle(array) {
         array[i] = array[j]
         array[j] = temp
     }
-
     return array;
 }
 
@@ -249,12 +234,10 @@ function selectAnswers() {
 
     let answersLi = document.querySelectorAll("li");
     let answersLiIcon = document.querySelectorAll("i");
-    //console.log(answersLi);
 
     for (let j = 0; j < answersLi.length; j++) {
         let eachAnswerBtn = answersLi[j];
         let eachAnswerIcon = answersLiIcon[j];
-        //eachAnswerBtn.childNodes[1].textContent = "radio_button_unchecked";
 
         eachAnswerBtn.addEventListener("click", function () {
 
@@ -282,9 +265,11 @@ function checkAnswer(info) {
     for (let j = 0; j < answersLi.length; j++) {
         let eachAnswer = answersLi[j]
         let eachAnswerIcon = answersLiIcon[j];
-        //console.log(eachAnswer.textContent)
-        if (eachAnswerIcon.textContent === "radio_button_checked") {
-            if (eachAnswer.textContent === info.correctAnswerId) {
+
+        if (eachAnswer.textContent === info.correctAnswerId) {
+            console.log(eachAnswer.textContent);
+
+            if (eachAnswerIcon.textContent === "radio_button_checked") {
                 totalRight++;
             }
         }
@@ -293,59 +278,56 @@ function checkAnswer(info) {
 
 
 function finalPage() {
-    //allowNext = false;
-    console.log('finalpage begin: ' + allowNext)
+
     let p = document.querySelector(".question-block p");
     let finalBtn = document.querySelector(".question-block button.nextBtn")
     let ul = document.querySelector("ul");
     let li = document.querySelector("li");
     finalBtn.textContent = "Check your answers!"
-    //selectAnswers();
-    //if (allowNext === true) {
-        finalBtn.addEventListener("click", function () {
-            console.log('finalbuttonlistener: ' + allowNext)
-            let section = document.querySelector("section");
-            section.style.flexFlow = "column wrap";
-            let questionBlock = document.querySelector(".question-block");
-            questionBlock.style.padding = "30px 40px 20px 40px";
-            //if (allowNext === true){
-                let p1 = document.createElement("p");
-                p1.className = "score-num";
-                let p2 = document.createElement("p");
-                p2.className = "score-text";
-                questionBlock.appendChild(p1);
-                questionBlock.appendChild(p2);
 
-                p.style.display = "none"
-                questionBlock.removeChild(ul)
-                ul.removeChild(li);
-                let sectionH3 = document.querySelector("section h3");
-                const gameinfoclass = document.querySelector('.game-info');
-                gameinfoclass.innerHTML = '';
-                sectionH3.textContent = "Result"
-                p1.textContent = totalRight;
-                p2.textContent = `correct answers from ${maxPage} questions`;
-                finalBtn.style.display = "none";
-                counter.style.display = "none";
+    finalBtn.addEventListener("click", function () {
 
-                let resetBtn = document.createElement("button");
-                resetBtn.textContent = "Play Again!";
-                resetBtn.className = "endButton"
-                questionBlock.appendChild(resetBtn);
+        let section = document.querySelector("section");
+        section.style.flexFlow = "column wrap";
+        let questionBlock = document.querySelector(".question-block");
+        questionBlock.style.padding = "30px 40px 20px 40px";
 
-                resetBtn.addEventListener("click", rePlayGame);
-                allowNext = false;
-                moveOn = true;
-            //}
+        let p1 = document.createElement("p");
+        p1.className = "score-num";
+        let p2 = document.createElement("p");
+        p2.className = "score-text";
+        questionBlock.appendChild(p1);
+        questionBlock.appendChild(p2);
 
-        })
-    //}
+        p.style.display = "none"
+        questionBlock.removeChild(ul)
+        ul.removeChild(li);
+        let sectionH3 = document.querySelector("section h3");
+        const gameinfoclass = document.querySelector('.game-info');
+        gameinfoclass.innerHTML = '';
+        sectionH3.textContent = "Result"
+        p1.textContent = totalRight;
+        p2.textContent = `correct answers from ${maxPage} questions`;
+        finalBtn.style.display = "none";
+        counter.style.display = "none";
+
+        let resetBtn = document.createElement("button");
+        resetBtn.textContent = "Play Again!";
+        resetBtn.className = "endButton"
+        questionBlock.appendChild(resetBtn);
+
+        resetBtn.addEventListener("click", rePlayGame);
+        allowNext = false;
+        moveOn = true;
+    })
 }
+
 
 function resetGame() {
     alert('Are you sure reset game?');
     location.reload();
 }
+
 
 function rePlayGame() {
     location.reload();
