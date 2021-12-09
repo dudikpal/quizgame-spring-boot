@@ -3,9 +3,8 @@ let listBox = document.querySelector("#adminCategoriesList");
 let upgradeQuestion = false;
 let upgradeQuestionId;
 
-function readAllCategories() {
 
-    //listBox.innerHTML = '';
+function readAllCategories() {
 
     fetch(url)
         .then(function (response) {
@@ -15,12 +14,10 @@ function readAllCategories() {
             let categories = jsonData.valueOf();
             for (const category of categories) {
                 fillCategoryToCreateQuestion(category);
-                // init dropdown with empty option
-                //fillCategoryToUpgradeQuestion({id: 0, name: ""});
                 fillCategoryToUpgradeQuestion(category);
             }
         });
-};
+}
 
 function fillCategoryToUpgradeQuestion(category) {
     let selectedCategory = document.querySelector('#categoryToUpgradeQuestion');
@@ -31,8 +28,9 @@ function fillCategoryToUpgradeQuestion(category) {
     option.innerHTML = category.name;
 
     selectedCategory.appendChild(option);
+    // init dropdown with empty option
     selectedCategory.selectedIndex = -1;
-};
+}
 
 function fillCategoryToCreateQuestion(category) {
     let label = document.createElement('label');
@@ -50,7 +48,7 @@ function fillCategoryToCreateQuestion(category) {
     label.appendChild(radio);
     label.appendChild(name);
     listBox.appendChild(label);
-};
+}
 
 readAllCategories();
 
@@ -64,9 +62,23 @@ function createQuestion() {
     const answer3 = document.querySelector('#answer-3');
     const correctAnswerId = document.querySelector('input[name="correctAnswer"]:checked');
     const categoryId = document.querySelector('input[name="groupCategories"]:checked');
+
+    if (!correctAnswerId || !categoryId) {
+        alert('Select the category and correct answer options')
+    }
+
     const correctAnswer = eval(`answer${correctAnswerId.id}`);
-    console.log(correctAnswerId)
-    console.log(correctAnswer)
+
+    if (
+        inputFieldIsEmpty(question.value) ||
+        inputFieldIsEmpty(answer0.value) ||
+        inputFieldIsEmpty(answer1.value) ||
+        inputFieldIsEmpty(answer2.value) ||
+        inputFieldIsEmpty(answer3.value)
+    ) {
+        alert('Input fields cannot be left blank');
+        return;
+    }
 
     let data = JSON.stringify(
         {
@@ -79,6 +91,7 @@ function createQuestion() {
 
     const url = 'api/questions';
 
+    // create or upgrade question
     if (upgradeQuestion) {
 
         fetch(url + '/' + upgradeQuestionId, {
@@ -119,6 +132,10 @@ const createCategoryButton = document.querySelector('#submit-new-category-button
 
 function createCategory() {
     const newCategoryName = document.querySelector('#newCategoryName');
+
+    if (inputFieldIsEmpty(newCategoryName.value)) {
+        return;
+    }
 
     let data = JSON.stringify({
         "name": newCategoryName.value
@@ -162,8 +179,9 @@ function updateQuestion() {
         .then(function (jsonData) {
             let listDiv = document.querySelector('#selectQuestion');
             listDiv.innerHTML = '';
-            for (const element of jsonData.valueOf()) {
-                fillUpgradeQuestionList(element);
+            // load questions in reverse order (newest on top)
+            for (let i = jsonData.length - 1; i >= 0; i--) {
+                fillUpgradeQuestionList(jsonData[i]);
             }
         });
 
@@ -215,3 +233,7 @@ function fillUpgradeQuestionList(questionObject) {
     listDiv.appendChild(aTag);
 }
 
+
+function inputFieldIsEmpty(value) {
+    return value === '';
+}
