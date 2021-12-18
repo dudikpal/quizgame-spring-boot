@@ -9,6 +9,8 @@
 <body>
 <h1>Admin page</h1>
 <div class="container">
+    <input type="file" onchange='onChooseFile(event, onFileLoad.bind(this, "fileContent"))'>
+    <p id="fileContent">Content: </p>
     <div class="row">
         <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="padding: 10px">
 
