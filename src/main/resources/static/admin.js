@@ -238,10 +238,50 @@ function inputFieldIsEmpty(value) {
     return value === '';
 }
 
-
+// Upload to database
 function onFileLoad(elementId, event) {
-    document.getElementById(elementId).innerText = event.target.result;
-    console.log(event.target.result);
+    // document.getElementById(elementId).innerText = event.target.result;
+    const file = event.target.result;
+    let questions = [file.split(/(?<=\r\n\d\r\n\r\n)/)];
+    for (const question of questions[0]) {
+        const rows = question.toString().split(/\r\n/);
+        let index = 0;
+        const category = rows[index];
+        index++;
+        let questionText = '';
+
+        while (!rows[index].startsWith('1:')) {
+            if (rows[index] == '') {
+                questionText += '\r\n\r\n';
+            } else {
+                questionText += rows[index];
+            }
+            index++;
+        }
+
+        let answers = [4];
+        for (let i = 0; i < 4; i++) {
+            answers[i] = rows[index].substring(2);
+            index++;
+        }
+        const correctAnswer = rows[index] - 1;
+        const adminLabel = Array.from(document.querySelectorAll('#adminCategoriesList label'));
+
+        const catInput = adminLabel[0].children[0];
+        const catSpan = adminLabel[0].children[1];
+
+        console.log(catInput)
+        console.log(catSpan)
+        console.log(adminLabel[0].child)
+        console.log(adminLabel[1])
+        /*let data = JSON.stringify(
+            "question": question.value,
+            "answers": [answer0.value, answer1.value, answer2.value, answer3.value],
+            "correctAnswerId": correctAnswer.value,
+            "categoryId": categoryId.id
+        );*/
+    }
+    //console.log(questions[0])
 }
 
 function onChooseFile(event, onLoadFileHandler) {
@@ -260,3 +300,5 @@ function onChooseFile(event, onLoadFileHandler) {
     const fileContent = fr.readAsText(file);
     const contentField = document.querySelector('#fileContent');
 }
+
+

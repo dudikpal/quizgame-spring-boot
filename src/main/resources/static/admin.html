@@ -9,11 +9,20 @@
 <body>
 <h1>Admin page</h1>
 <div class="container">
-    <input type="file" onchange='onChooseFile(event, onFileLoad.bind(this, "fileContent"))'>
-    <p id="fileContent">Content: </p>
     <div class="row">
         <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="padding: 10px">
-
+            <div class="card"
+                 style="width: fit-content; background-color: white; display: block; border: 1px solid; padding: 10px; margin-bottom: 20px">
+                <div class="card-header" style="margin-bottom: 10px">
+                    Upload to database
+                </div>
+                    <input id="browse" style="display: none" type="file"
+                           onchange='onChooseFile(event, onFileLoad.bind(this, "fileContent"))'>
+                    <button id='browser' onclick='browse.click()'>
+                        Upload file
+                    </button>
+                    <!--<p id="fileContent">Content: </p>-->
+            </div>
             <div class="card"
                  style="width: fit-content; background-color: white; display: block; border: 1px solid; padding: 10px">
                 <div class="card-header">
@@ -86,18 +95,17 @@
                  style="margin: 10px; padding: 15px; max-width: 45rem; min-width: 35rem; background-color: white; display: block; border: 1px solid">
                 <div class="card-header">Choose question to edit</div>
                 <div class="card-body">
-                <div class="input-group mb-3">
-                    <label class="input-group-text" for="categoryToUpgradeQuestion">Categories</label>
-                    <select class="form-select" id="categoryToUpgradeQuestion" onchange="updateQuestion()">
-                    <!-- Category DropDown -->
-                    </select>
-                </div>
-                <div id="selectQuestion" class="list-group " style="overflow: scroll; max-height: 30rem; "  >
-                <!-- Questions -->
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="categoryToUpgradeQuestion">Categories</label>
+                        <select class="form-select" id="categoryToUpgradeQuestion" onchange="updateQuestion()">
+                            <!-- Category DropDown -->
+                        </select>
+                    </div>
+                    <div id="selectQuestion" class="list-group " style="overflow: scroll; max-height: 30rem; ">
+                        <!-- Questions -->
 
+                    </div>
                 </div>
-                </div>
-
 
 
             </div>
