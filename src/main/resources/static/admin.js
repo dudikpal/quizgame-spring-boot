@@ -265,23 +265,26 @@ function onFileLoad(elementId, event) {
             index++;
         }
         const correctAnswer = rows[index] - 1;
-        const adminLabel = Array.from(document.querySelectorAll('#adminCategoriesList label'));
+        const categoryLabel = Array.from(document.querySelectorAll('#adminCategoriesList label'))
+            .find(cat => cat.lastChild.textContent === ` ${category}`);
+        const categoryId = categoryLabel.getAttribute('for');
 
-        const catInput = adminLabel[0].children[0];
-        const catSpan = adminLabel[0].children[1];
+        let dataToUpload = JSON.stringify({
+            "question": questionText,
+            "answers": answers,
+            "correctAnswerId": correctAnswer,
+            "categoryId": categoryId
+        });
 
-        console.log(catInput)
-        console.log(catSpan)
-        console.log(adminLabel[0].child)
-        console.log(adminLabel[1])
-        /*let data = JSON.stringify(
-            "question": question.value,
-            "answers": [answer0.value, answer1.value, answer2.value, answer3.value],
-            "correctAnswerId": correctAnswer.value,
-            "categoryId": categoryId.id
-        );*/
+        const url = '/api/questions';
+        fetch(url, {
+            method: "POST",
+            body: dataToUpload,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
     }
-    //console.log(questions[0])
 }
 
 function onChooseFile(event, onLoadFileHandler) {
@@ -297,8 +300,7 @@ function onChooseFile(event, onLoadFileHandler) {
     let file = input.files[0];
     let fr = new FileReader();
     fr.onload = onLoadFileHandler;
-    const fileContent = fr.readAsText(file);
-    const contentField = document.querySelector('#fileContent');
+    fr.readAsText(file);
 }
 
 
