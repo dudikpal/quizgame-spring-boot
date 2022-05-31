@@ -1,0 +1,33 @@
+Matematika
+Mennyi 360 * 12?
+1:4597
+2:4320
+3:4287
+4:3999
+2
+
+Irodalom
+Ki zenésítette meg a Himnusz-t?
+1:Hajós Alfréd
+2:Albert Einstein
+3:Egressy Béni
+4:Erkel Ferenc
+4
+
+Irodalom
+Ki írta a Szózat-ot?
+1:Kölcsey Ferenc
+2:Deák Ferenc
+3:Vörösmarthy Mihály
+4:Egressy Béni
+3
+
+Nyelvtan
+Melyik a tárgy az alábbi mondatban?
+
+Mesi kenyeret vajaz a késsel.
+1:Mesi
+2:kenyeret
+3:vajaz
+4:késsel
+2
